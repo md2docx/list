@@ -1,71 +1,149 @@
-# @m2d/list
+# `@m2d/list` <img src="https://raw.githubusercontent.com/mayank1513/mayank1513/main/popper.png" height="40"/>
 
-[![test](https://github.com/md2docx/list/actions/workflows/test.yml/badge.svg)](https://github.com/md2docx/list/actions/workflows/test.yml) [![Maintainability](https://api.codeclimate.com/v1/badges/aa896ec14c570f3bb274/maintainability)](https://codeclimate.com/github/md2docx/list/maintainability) [![codecov](https://codecov.io/gh/md2docx/list/graph/badge.svg)](https://codecov.io/gh/md2docx/list) [![Version](https://img.shields.io/npm/v/@m2d/list.svg?colorB=green)](https://www.npmjs.com/package/@m2d/list) [![Downloads](https://img.jsdelivr.com/img.shields.io/npm/d18m/@m2d/list.svg)](https://www.npmjs.com/package/@m2d/list) ![npm bundle size](https://img.shields.io/bundlephobia/minzip/@m2d/list)
+[![test](https://github.com/md2docx/list/actions/workflows/test.yml/badge.svg)](https://github.com/md2docx/list/actions/workflows/test.yml) [![codecov](https://codecov.io/gh/md2docx/list/graph/badge.svg)](https://codecov.io/gh/md2docx/list) [![Version](https://img.shields.io/npm/v/@m2d/list?color=green)](https://www.npmjs.com/package/@m2d/list) ![Downloads](https://img.shields.io/npm/d18m/@m2d/list) ![Bundle Size](https://img.shields.io/bundlephobia/minzip/@m2d/list)
 
-> Emoji shortcode support for `mdast2docx`
-
-This plugin adds support for emoji shortcodes (e.g., `:smile:`, `:rocket:`) in your Markdown-to-DOCX conversion pipeline. It replaces recognized emoji shortcodes with their corresponding Unicode characters during the MDAST transformation.
-
----
-
-## ✨ Features
-
-- Converts emoji shortcodes to Unicode emojis (e.g., `:tada:` → 🎉)
-- Compatible with [`@m2d/core`](https://www.npmjs.com/package/@m2d/core)
-- Works seamlessly within the `mdast2docx` plugin ecosystem
-- Easy to integrate and lightweight
+> Enables **ordered list** support in DOCX output from Markdown.
 
 ---
 
 ## 📦 Installation
 
 ```bash
-pnpm install @m2d/list
+npm install @m2d/list
 ```
 
-**_or_**
+```bash
+pnpm add @m2d/list
+```
 
 ```bash
 yarn add @m2d/list
 ```
 
-**_or_**
+---
 
-```bash
-npm add @m2d/list
+## 🚀 Overview
+
+The `@m2d/list` plugin for [`mdast2docx`](https://github.com/mayankchaudhari/mdast2docx) enables structured list rendering — including support for multilevel ordered lists (`1.`, `1.1`, `A.`, etc.) and customizable bullet points.
+
+Features:
+
+- Nested ordered/unordered lists
+- Hierarchical formatting (e.g., `1.1`, `A.`, `a.`)
+- Word-compatible bullet symbols (● ○ ■ ◆ ▶ …)
+- Optional use of Word's default list styling
+
+---
+
+## 🛠️ Usage
+
+```ts
+import { listPlugin } from "@m2d/list";
+
+const plugins = [
+  htmlPlugin(),
+  listPlugin(), // ✅ Place after htmlPlugin
+  // ...other plugins like @m2d/core or @m2d/html
+];
+```
+
+> 🧠 If you're using `@m2d/html`, ensure it comes **before** this plugin so HTML-based `<ul>` and `<ol>` tags are parsed correctly.
+
+---
+
+## 📋 Example
+
+```md
+- Bullet list item
+  - Nested bullet
+    - More depth
+
+1. Ordered list
+2. Next item
+   1. Nested 1.1
+   2. Nested 1.2
+```
+
+🧾 **Result**: Properly formatted multilevel lists in the generated `.docx`.
+
+---
+
+## ⚙️ Plugin Options
+
+```ts
+interface IListPluginOptions {
+  /**
+   * Custom ordered list level configurations.
+   * Controls numbering format and indentation per depth.
+   */
+  levels?: ILevelsOptions[];
+
+  /**
+   * Custom bullet list level configurations.
+   * Controls numbering format and indentation per depth.
+   */
+  bulletLevels?: ILevelsOptions[];
+
+  /**
+   * Bullet characters (for up to 10 levels).
+   * Defaults: ["●", "○", "■", "◆", "▶", "◉", "⬤", "♦", "◦", "▪"]
+   */
+  bullets?: string[];
+
+  /**
+   * Use Word's default bullet styles (instead of custom).
+   * Default: false
+   */
+  defaultBullets?: boolean;
+}
+```
+
+### Example with Custom Options
+
+```ts
+listPlugin({
+  defaultBullets: true, // use Word’s default styling
+});
 ```
 
 ---
 
 ## 🧠 How It Works
 
-This plugin scans all text nodes for emoji shortcodes (e.g., `:fire:`, `:sparkles:`) and replaces them with matching Unicode emojis using a predefined emoji JSON mapping.
+1. Generates unique references for ordered and bullet lists (to prevent style conflicts).
+2. Adds multi-level numbering or bullets using `docx`'s `ILevelsOptions`.
+3. Recursively handles nested list levels with correct indentation.
+4. Uses fallback bullet characters if level exceeds default array size.
 
 ---
 
-## 🔍 Emoji Support
+## 💡 Features
 
-It uses the [GitHub-style emoji shortcodes](https://github.com/ikatyang/emoji-cheat-sheet) and more — if a shortcode is not recognized, it will remain unchanged.
-
----
-
-## 🛠️ Development
-
-```bash
-# Clone and install dependencies
-git clone https://github.com/md2docx/emoji-plugin
-cd emoji-plugin
-npm install
-
-# Build / Test / Dev
-npm run build
-```
+- **Multilevel nesting** with increasing indentation
+- **Customizable bullet characters** per depth
+- **Word-compatible formatting** out of the box
+- **Unique list styles** per instance (no collisions)
+- This plugin ensures **consistent indentation** between ordered and unordered lists.
+- List rendering assumes a **client-side** or DOM-like environment due to its dependency on DOCX-specific formatting and structure.
 
 ---
 
-## 📄 License
+## **⚠️ Limitations**
 
-Licensed under the **MPL-2.0** License.
+- Task lists like `- [x]`, `- [ ]` are supported (via `@m2d/core`), but:
+  - The checkbox is rendered as the **first character** of the list item.
+  - It does **not replace** the bullet or number.
+
+---
+
+## 🔌 Related Plugins/Packages
+
+| Plugin                                               | Purpose                                |
+| ---------------------------------------------------- | -------------------------------------- |
+| [`@m2d/core`](https://npmjs.com/package/@m2d/core)   | Converts extended MDAST to DOCX        |
+| [`@m2d/html`](https://npmjs.com/package/@m2d/html)   | Parses raw HTML to extended MDAST      |
+| [`@m2d/table`](https://npmjs.com/package/@m2d/table) | Renders table nodes to DOCX            |
+| [`@m2d/image`](https://npmjs.com/package/@m2d/image) | Renders inline images into DOCX format |
 
 ---
 
@@ -73,8 +151,14 @@ Licensed under the **MPL-2.0** License.
 
 If you find this useful:
 
-- ⭐ Star [mdast2docx](https://github.com/md2docx/mdast2docx) on GitHub
+- ⭐ Star [mdast2docx](https://github.com/tiny-md/mdast2docx) on GitHub
 - ❤️ Consider [sponsoring](https://github.com/sponsors/mayank1513)
+
+---
+
+## 🧾 License
+
+MIT © [Mayank Chaudhari](https://github.com/mayankchaudhari)
 
 ---
 

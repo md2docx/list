@@ -1,97 +1,156 @@
-import { IPlugin } from "@m2d/core";
-import { InlineDocxNodes } from "@m2d/core/utils";
-import type { Paragraph, Table } from "docx";
-
-interface IListPluginOptions {
-  /**
-   * A mapping of list shortcodes to their corresponding Unicode characters.
-   * This allows for easy customization of the list representation.
-   */
-  lists?: Record<string, string>;
-}
+import { AlignmentType, convertInchesToTwip, ILevelsOptions, LevelFormat } from "docx";
+import type { IPlugin, Optional } from "@m2d/core";
 
 /**
- * List plugin for @m2d/core.
- * This plugin provides support for custom list transformation within Markdown content
- * during conversion to DOCX format.
+ * Default options for the list plugin.
+ */
+interface IDefaultListPluginOptions {
+  /** Defines the numbering styles for ordered lists. */
+  levels: ILevelsOptions[];
+  /** Defines the numbering styles for bullet lists (optional). */
+  bulletLevels?: ILevelsOptions[];
+  /**
+   * Bullet characters used for unordered lists.
+   * These closely match the default bullets in Microsoft Word.
+   */
+  bullets: string[];
+  /** If true, uses Word's default bullet styles instead of custom ones. */
+  defaultBullets: boolean;
+}
+
+/** Type representing optional list plugin options. */
+export type IListPluginOptions = Optional<IDefaultListPluginOptions>;
+
+const levelFormats: (typeof LevelFormat)[keyof typeof LevelFormat][] = [
+  LevelFormat.DECIMAL,
+  LevelFormat.DECIMAL,
+  LevelFormat.DECIMAL,
+  LevelFormat.DECIMAL,
+  LevelFormat.UPPER_LETTER,
+  LevelFormat.LOWER_LETTER,
+  LevelFormat.LOWER_ROMAN,
+  LevelFormat.UPPER_ROMAN,
+];
+
+/**
+ * Generates a list of numbering levels for ordered lists.
+ *
+ * @param levelFormats - An array of level formats defining the numbering style at each level.
+ * @param indent - The starting indentation in inches for the first level.
+ * @param indentStep - The incremental indentation added for each subsequent level.
+ * @returns An array of `ILevelsOptions` defining the hierarchical numbering style.
+ *
+ * Example:
+ * - Level 1: "1."
+ * - Level 2: "1.1."
+ * - Level 3: "1.1.1."
+ * - Level 4: "A."
+ * - Level 5: "a."
+ */
+export const createLevels = (
+  levelFormats: (typeof LevelFormat)[keyof typeof LevelFormat][],
+  indent = 0.4, // Base indentation for the first level (in inches)
+  indentStep = 0.25, // Additional indentation per level
+) =>
+  levelFormats.map((format, i) => ({
+    level: i,
+    format,
+    text:
+      (format === LevelFormat.DECIMAL
+        ? Array(i + 1)
+            .fill(`%${i + 1}`)
+            .join(".") // Generates hierarchical decimal numbering (e.g., "1.1.1")
+        : `%${i + 1}`) + ".",
+    alignment: AlignmentType.START,
+    style: {
+      paragraph: {
+        indent: { left: convertInchesToTwip(indent + i * indentStep) }, // Ensures consistent indentation
+      },
+    },
+  }));
+
+/** Default numbering levels for ordered lists (1., 1.1, A) */
+const levels = createLevels(levelFormats);
+
+/** Commonly used bullet characters in Word */
+const bullets = ["●", "○", "■", "◆", "▶", "◉", "⬤", "♦", "◦", "▪"];
+
+/** Default plugin options */
+const defaultListPluginOptions: IDefaultListPluginOptions = {
+  levels,
+  bullets,
+  defaultBullets: false,
+};
+
+/**
+ * A plugin that enables support for ordered and unordered lists in DOCX.
+ *
+ * @param options - Optional configuration for customizing lists.
+ * @returns An `IPlugin` instance for handling lists in the document.
  */
 export const listPlugin: (options?: IListPluginOptions) => IPlugin = options => {
-  // merge options with the default options if needed
+  const uId = crypto.getRandomValues(new Uint32Array(1))[0].toString(16);
+  const numReference = `numbering-${uId}`;
+  const bulletReference = `bullet-${uId}`;
+  const { levels, bulletLevels, bullets, defaultBullets } = {
+    ...defaultListPluginOptions,
+    ...options,
+  };
+
   return {
     /**
-     * Handles inline-level MDAST nodes (e.g., text, strong, emphasis).
+     * Processes block-level list nodes.
      *
-     * @param docx - DOCX context (factory methods, styles, etc.)
-     * @param node - MDAST inline node to be processed
-     * @param runProps - Formatting properties like bold, italics, etc.
-     * @param definitions - Reference definitions (e.g., for links)
-     * @param footnoteDefinitions - Footnote mappings
-     * @param inlineChildrenProcessor - Helper function to process child inline nodes
-     * @returns Array of InlineDocxNodes representing the DOCX output
+     * @param docx - The docx instance.
+     * @param node - The list node from the MDAST tree.
+     * @param paraProps - Paragraph properties to apply.
+     * @param blockChildrenProcessor - Function to process child list items.
+     * @returns Processed paragraphs representing the list.
      */
-    inline: async (
-      docx,
-      node,
-      runProps,
-      definitions,
-      footnoteDefinitions,
-      inlineChildrenProcessor,
-    ) => {
-      const docxNodes: InlineDocxNodes[] = [];
+    block: async (_docx, node, paraProps, blockChildrenProcessor) => {
+      if (node.type !== "list") return [];
 
-      if (node.type === "") {
-        /**
-         * TODO: Add logic to handle specific inline node types (e.g., list).
-         * This block should convert the node into one or more InlineDocxNodes.
-         */
-        node.type = "";
-      }
+      const level = (paraProps.bullet?.level ?? -1) + 1;
 
-      return docxNodes;
+      paraProps.numbering = defaultBullets
+        ? undefined
+        : {
+            level,
+            reference: node.ordered ? numReference : bulletReference,
+          };
+
+      paraProps.bullet = { level };
+
+      // @ts-expect-error -- setting type to empty string to avoid recomputation
+      node.type = "";
+      return await blockChildrenProcessor(node, paraProps);
     },
 
     /**
-     * Handles block-level MDAST nodes (e.g., paragraphs, headings, lists).
+     * Configures document-level numbering and bullet styles.
      *
-     * @param docx - DOCX context
-     * @param node - MDAST block node to be processed
-     * @param paraProps - Paragraph formatting properties
-     * @param blockChildrenProcessor - Processes child block nodes recursively
-     * @param inlineChildrenProcessor - Processes child inline nodes inside block nodes
-     * @returns Array of Paragraph or Table objects representing DOCX content
-     */
-    block: async (docx, node, paraProps, blockChildrenProcessor, inlineChildrenProcessor) => {
-      const docxNodes: (Paragraph | Table)[] = [];
-
-      if (node.type === "") {
-        /**
-         * TODO: Add logic to handle specific block node types.
-         * This block should convert the node into one or more Paragraph/Table objects.
-         */
-        node.type = "";
-      }
-
-      return docxNodes;
-    },
-
-    /**
-     * Optional: Modifies the DOCX document metadata or style before rendering.
-     *
-     * @param props - Root-level properties such as title, styles, metadata, etc.
+     * @param props - The document properties object.
      */
     root: props => {
-      // Example: Override the document title
-      props.title = "My custom title";
-    },
-
-    /**
-     * Optional: Runs before conversion starts, allowing transformation or filtering
-     * of the MDAST (Markdown Abstract Syntax Tree).
-     *
-     * @param tree - The full MDAST tree before processing
-     */
-    preprocess: tree => {
-      // TODO: Modify or traverse the MDAST tree if needed (e.g., convert list syntax)
+      props.numbering = {
+        config: [
+          ...(props.numbering?.config ?? []),
+          {
+            reference: numReference,
+            levels,
+          },
+          {
+            reference: bulletReference,
+            levels:
+              bulletLevels ??
+              levels.map((level, i) => ({
+                ...level,
+                text: bullets[i] ?? "•",
+                format: LevelFormat.BULLET,
+              })),
+          },
+        ],
+      };
     },
   };
 };
