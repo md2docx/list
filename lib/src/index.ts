@@ -1,5 +1,6 @@
 import { AlignmentType, convertInchesToTwip, ILevelsOptions, LevelFormat } from "docx";
 import type { IPlugin, Optional } from "@m2d/core";
+import { start } from "repl";
 
 /**
  * Default options for the list plugin.
@@ -58,7 +59,8 @@ export const createLevels = (
     text:
       (format === LevelFormat.DECIMAL
         ? Array(i + 1)
-            .fill(`%${i + 1}`)
+            .fill(0)
+            .map((_, i) => `%${i + 1}`)
             .join(".") // Generates hierarchical decimal numbering (e.g., "1.1.1")
         : `%${i + 1}`) + ".",
     alignment: AlignmentType.START,
@@ -89,7 +91,7 @@ const defaultListPluginOptions: IDefaultListPluginOptions = {
  * @returns An `IPlugin` instance for handling lists in the document.
  */
 export const listPlugin: (options?: IListPluginOptions) => IPlugin = options => {
-  const uId = crypto.getRandomValues(new Uint32Array(1))[0].toString(16);
+  const uId = crypto.randomUUID();
   const numReference = `numbering-${uId}`;
   const bulletReference = `bullet-${uId}`;
   const { levels, bulletLevels, bullets, defaultBullets } = {
