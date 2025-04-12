@@ -1,6 +1,5 @@
 import { AlignmentType, convertInchesToTwip, ILevelsOptions, LevelFormat } from "docx";
 import type { IPlugin, Optional } from "@m2d/core";
-import { start } from "repl";
 
 /**
  * Default options for the list plugin.
