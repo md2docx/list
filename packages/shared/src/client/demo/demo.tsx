@@ -46,10 +46,13 @@ export function Demo() {
       {},
       {
         plugins: [
+          // @ts-expect-error -- WIP
           htmlPlugin(),
           tablePlugin(),
+          // @ts-expect-error -- WIP
           listPlugin(),
           mathPlugin(),
+          // @ts-expect-error -- WIP
           emojiPlugin(),
           imagePlugin(),
         ],

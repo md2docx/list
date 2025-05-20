@@ -56,6 +56,7 @@ export const createLevels = (
     level: i,
     format,
     text:
+      // skipcq: JS-0246
       (format === LevelFormat.DECIMAL
         ? Array(i + 1)
             .fill(0)
@@ -96,7 +97,7 @@ export const listPlugin: (options?: IListPluginOptions) => IPlugin = options => 
   const { levels, bulletLevels, bullets, defaultBullets } = {
     ...defaultListPluginOptions,
     ...options,
-  };
+  } as IDefaultListPluginOptions;
 
   return {
     /**
@@ -108,7 +109,7 @@ export const listPlugin: (options?: IListPluginOptions) => IPlugin = options => 
      * @param blockChildrenProcessor - Function to process child list items.
      * @returns Processed paragraphs representing the list.
      */
-    block: async (_docx, node, paraProps, blockChildrenProcessor) => {
+    block: (_docx, node, paraProps, blockChildrenProcessor) => {
       if (node.type !== "list") return [];
 
       const level = (paraProps.bullet?.level ?? -1) + 1;
@@ -124,7 +125,7 @@ export const listPlugin: (options?: IListPluginOptions) => IPlugin = options => 
 
       // @ts-expect-error -- setting type to empty string to avoid recomputation
       node.type = "";
-      return await blockChildrenProcessor(node, paraProps);
+      return blockChildrenProcessor(node, paraProps);
     },
 
     /**
