@@ -1,5 +1,11 @@
 # @m2d/list
 
+## 0.0.6
+
+### Patch Changes
+
+- 5a8a04e: Upgrade core package to v1
+
 ## 0.0.5
 
 ### Patch Changes
