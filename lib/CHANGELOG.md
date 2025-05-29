@@ -1,5 +1,11 @@
 # @m2d/list
 
+## 0.0.7
+
+### Patch Changes
+
+- 14aa02f: chore: update core package
+
 ## 0.0.6
 
 ### Patch Changes
