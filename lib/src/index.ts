@@ -1,5 +1,5 @@
 import { AlignmentType, convertInchesToTwip, ILevelsOptions, LevelFormat } from "docx";
-import type { IPlugin, Optional } from "@m2d/core";
+import type { EmptyNode, IPlugin, Optional } from "@m2d/core";
 
 /**
  * Default options for the list plugin.
@@ -123,9 +123,12 @@ export const listPlugin: (options?: IListPluginOptions) => IPlugin = options => 
 
       paraProps.bullet = { level };
 
+      (node as unknown as EmptyNode)._type = node.type;
       // @ts-expect-error -- setting type to empty string to avoid recomputation
       node.type = "";
-      return blockChildrenProcessor(node, paraProps);
+      node.data = { ...node.data, tag: node.ordered ? "ol" : "ul" };
+      // @ts-expect-error -- Adding additional props
+      return blockChildrenProcessor(node, { ...paraProps, ...node.data });
     },
 
     /**
