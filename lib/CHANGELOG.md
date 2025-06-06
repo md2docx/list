@@ -1,5 +1,11 @@
 # @m2d/list
 
+## 0.0.8
+
+### Patch Changes
+
+- 423c7ca: Ensure enough data is available on node after processing to convert to JSX.
+
 ## 0.0.7
 
 ### Patch Changes
