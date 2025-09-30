@@ -1,5 +1,10 @@
-import { AlignmentType, convertInchesToTwip, ILevelsOptions, LevelFormat } from "docx";
 import type { EmptyNode, IPlugin, Optional } from "@m2d/core";
+import {
+  AlignmentType,
+  convertInchesToTwip,
+  type ILevelsOptions,
+  LevelFormat,
+} from "docx";
 
 /**
  * Default options for the list plugin.
@@ -57,12 +62,14 @@ export const createLevels = (
     format,
     text:
       // skipcq: JS-0246
-      (format === LevelFormat.DECIMAL
-        ? Array(i + 1)
-            .fill(0)
-            .map((_, i) => `%${i + 1}`)
-            .join(".") // Generates hierarchical decimal numbering (e.g., "1.1.1")
-        : `%${i + 1}`) + ".",
+      `${
+        format === LevelFormat.DECIMAL
+          ? Array(i + 1)
+              .fill(0)
+              .map((_, i) => `%${i + 1}`)
+              .join(".") // Generates hierarchical decimal numbering (e.g., "1.1.1")
+          : `%${i + 1}`
+      }.`,
     alignment: AlignmentType.START,
     style: {
       paragraph: {
@@ -90,7 +97,9 @@ const defaultListPluginOptions: IDefaultListPluginOptions = {
  * @param options - Optional configuration for customizing lists.
  * @returns An `IPlugin` instance for handling lists in the document.
  */
-export const listPlugin: (options?: IListPluginOptions) => IPlugin = options => {
+export const listPlugin: (options?: IListPluginOptions) => IPlugin = (
+  options,
+) => {
   const uId = crypto.randomUUID();
   const numReference = `numbering-${uId}`;
   const bulletReference = `bullet-${uId}`;
@@ -136,7 +145,7 @@ export const listPlugin: (options?: IListPluginOptions) => IPlugin = options => 
      *
      * @param props - The document properties object.
      */
-    root: props => {
+    root: (props) => {
       props.numbering = {
         config: [
           ...(props.numbering?.config ?? []),
