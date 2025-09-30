@@ -59,8 +59,8 @@ export function Demo() {
           imagePlugin(),
         ],
       },
-    ).then((blob: Blob) => {
-      const url = URL.createObjectURL(blob);
+    ).then((blob) => {
+      const url = URL.createObjectURL(blob as Blob);
       const link = document.createElement("a");
       link.href = url;
       link.download = "my-document.docx";
