@@ -108,6 +108,8 @@ export const listPlugin: (options?: IListPluginOptions) => IPlugin = (
     ...options,
   } as IDefaultListPluginOptions;
 
+  let instance = 0;
+
   return {
     /**
      * Processes block-level list nodes.
@@ -128,6 +130,7 @@ export const listPlugin: (options?: IListPluginOptions) => IPlugin = (
         : {
             level,
             reference: node.ordered ? numReference : bulletReference,
+            instance: instance++,
           };
 
       paraProps.bullet = { level };

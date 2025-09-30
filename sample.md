@@ -9,7 +9,7 @@ tags: [mdast, markdown, reference]
 
 # Markdown Syntax Showcase
 
-## 2. Lists
+## Lists
 
 # Nested Lists in Markdown
 
@@ -30,6 +30,36 @@ tags: [mdast, markdown, reference]
     - Raw
 
 ## Ordered Nested List
+
+1. Morning Routine
+   1. Wake up
+   2. Brush teeth
+   3. Exercise
+      1. Yoga
+      2. Running
+2. Work Tasks
+   1. Check emails
+   2. Daily stand-up
+   3. Coding
+      1. Feature development
+      2. Code review
+
+### Another list
+
+1. Morning Routine
+   1. Wake up
+   2. Brush teeth
+   3. Exercise
+      1. Yoga
+      2. Running
+2. Work Tasks
+   1. Check emails
+   2. Daily stand-up
+   3. Coding
+      1. Feature development
+      2. Code review
+
+### Yet Another list
 
 1. Morning Routine
    1. Wake up
