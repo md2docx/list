@@ -1,5 +1,11 @@
 # @m2d/list
 
+## 0.0.9
+
+### Patch Changes
+
+- 038a04f: fix(list): restart ordered lists at `1.` instead of continuing numbering across lists
+
 ## 0.0.8
 
 ### Patch Changes
