@@ -1,3 +1,17 @@
+> [!IMPORTANT]
+> ### 📦 This repository has moved!
+>
+> Active development and maintenance of **`@m2d/list`** has moved to the unified **[md2docx](https://github.com/md2docx/md2docx)** monorepo.
+>
+> - 🏠 **Monorepo:** [github.com/md2docx/md2docx](https://github.com/md2docx/md2docx)
+> - 📂 **Package Source:** [`packages/list`](https://github.com/md2docx/md2docx/tree/main/packages/list)
+> - 📖 **Documentation:** [md2docx.js.org/docs/list](https://md2docx.js.org/docs/list)
+> - 💬 **Issues & Pull Requests:** Please submit all new issues, feedback, and PRs in the [md2docx issue tracker](https://github.com/md2docx/md2docx/issues).
+>
+> *This standalone repository is now archived and retained for historical reference only. Releases and npm updates continue from the monorepo.*
+
+---
+
 # @m2d/list
 
 [![test](https://github.com/md2docx/list/actions/workflows/test.yml/badge.svg)](https://github.com/md2docx/list/actions/workflows/test.yml) [![Maintainability](https://api.codeclimate.com/v1/badges/aa896ec14c570f3bb274/maintainability)](https://codeclimate.com/github/md2docx/list/maintainability) [![codecov](https://codecov.io/gh/md2docx/list/graph/badge.svg)](https://codecov.io/gh/md2docx/list) [![Version](https://img.shields.io/npm/v/@m2d/list.svg?colorB=green)](https://www.npmjs.com/package/@m2d/list) [![Downloads](https://img.jsdelivr.com/img.shields.io/npm/d18m/@m2d/list.svg)](https://www.npmjs.com/package/@m2d/list) ![npm bundle size](https://img.shields.io/bundlephobia/minzip/@m2d/list)
